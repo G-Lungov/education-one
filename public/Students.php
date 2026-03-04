@@ -1,42 +1,87 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/repository/StudentRepository.php';
+
+require '../src/Service/StudentService.php';
 require '../src/views/layout/Header.php';
 
-$studentRepository = new StudentRepository($pdo);
+$service = new StudentService($pdo);
 
-// Se enviou formulário
+$message = "";
+$editingStudent = null;
+
+// DELETE
+if (isset($_GET['delete'])) {
+    $id = (int) $_GET['delete'];
+    $message = $service->delete($id);
+
+    header("Location: students.php?message=" . urlencode($message));
+    exit;
+}
+
+// EDIT
+if (isset($_GET['edit'])) {
+    $id = (int) $_GET['edit'];
+    $editingStudent = $service->findById($id);
+}
+
+// CREATE or UPDATE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $id = $_POST['id'] ?? null;
     $name = $_POST['name'];
     $birthDate = $_POST['birth_date'];
     $cpf = $_POST['cpf'];
 
-    $studentRepository->save($name, $birthDate, $cpf);
+    if ($id) {
+        $message = $service->update((int)$id, $name);
+    } else {
+        $message = $service->create($name, $birthDate, $cpf);
+    }
 
-    header("Location: students.php");
+    header("Location: students.php?message=" . urlencode($message));
     exit;
 }
 
-$students = $studentRepository->findAll();
+if (isset($_GET['message'])) {
+    $message = $_GET['message'];
+}
+
+$students = $service->findAll();
 
 ?>
 
-<!-- HTML -->
-
 <h1>Cadastro de Alunos</h1>
 
+<?php if ($message): ?>
+    <p><strong><?= htmlspecialchars($message) ?></strong></p>
+<?php endif; ?>
+
 <form method="POST">
+
+    <?php if ($editingStudent): ?>
+        <input type="hidden" name="id" value="<?= $editingStudent['id'] ?>">
+    <?php endif; ?>
+
     <label>Nome:</label><br>
-    <input type="text" name="name" required><br><br>
+    <input type="text" name="name"
+        value="<?= $editingStudent ? htmlspecialchars($editingStudent['name']) : '' ?>"
+        required><br><br>
 
     <label>Data de Nascimento:</label><br>
-    <input type="date" name="birth_date" required><br><br>
+    <input type="date" name="birth_date"
+        value="<?= $editingStudent ? $editingStudent['birth_date'] : '' ?>"
+        required><br><br>
 
     <label>CPF:</label><br>
-    <input type="text" name="cpf" required><br><br>
+    <input type="text" name="cpf"
+        value="<?= $editingStudent ? htmlspecialchars($editingStudent['cpf']) : '' ?>"
+        required><br><br>
 
-    <button type="submit">Cadastrar</button>
+    <button type="submit">
+        <?= $editingStudent ? 'Atualizar' : 'Cadastrar' ?>
+    </button>
+
 </form>
 
 <hr>
@@ -51,18 +96,24 @@ $students = $studentRepository->findAll();
         width: 100%;
     }
 </style>
+
 <table>
     <tr>
         <th>Nome</th>
         <th>Data Nascimento</th>
         <th>CPF</th>
+        <th>Ações</th>
     </tr>
 
     <?php foreach ($students as $student): ?>
         <tr>
             <td><?= htmlspecialchars($student['name']) ?></td>
             <td><?= $student['birth_date'] ?></td>
-            <td><?= $student['cpf'] ?></td>
+            <td><?= htmlspecialchars($student['cpf']) ?></td>
+            <td>
+                <a href="students.php?edit=<?= $student['id'] ?>">Editar</a> |
+                <a href="students.php?delete=<?= $student['id'] ?>" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
+            </td>
         </tr>
     <?php endforeach; ?>
 

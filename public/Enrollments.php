@@ -1,74 +1,122 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/service/EnrollmentService.php';
+
+require '../src/Service/EnrollmentService.php';
 require '../src/views/layout/Header.php';
 
+$service = new EnrollmentService($pdo);
+$studentRepository = new StudentRepository($pdo);
+$classRoomRepository = new ClassRoomRepository($pdo);
 $enrollmentRepository = new EnrollmentRepository($pdo);
 
-// Buscar alunos
-$studentsStmt = $pdo->query("SELECT id, name FROM students ORDER BY name");
-$students = $studentsStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Buscar turmas
-$classroomsStmt = $pdo->query("SELECT id, description, year, places FROM classrooms");
-$classrooms = $classroomsStmt->fetchAll(PDO::FETCH_ASSOC);
-
 $message = "";
+$editingEnrollment = null;
 
+// DELETE
+if (isset($_GET['delete'])) {
+    $id = (int) $_GET['delete'];
+    $message = $service->delete($id);
+
+    header("Location: enrollments.php?message=" . urlencode($message));
+    exit;
+}
+
+// EDIT (TROCAR DE TURMA)
+if (isset($_GET['edit'])) {
+    $id = (int) $_GET['edit'];
+    $editingEnrollment = $enrollmentRepository->findById($id);
+}
+
+// CREATE ou UPDATE
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $studentId = (int) $_POST['student_id'];
     $classRoomId = (int) $_POST['classroom_id'];
 
-    $service = new EnrollmentService($pdo);
-    $message = $service->enroll($studentId, $classRoomId);
+    // Se estiver editando → transferir
+    if (isset($_POST['enrollment_id']) && !empty($_POST['enrollment_id'])) {
+        $enrollmentId = (int) $_POST['enrollment_id'];
+        $message = $service->transfer($enrollmentId, $classRoomId);
+    } else {
+        // Senão → nova matrícula
+        $message = $service->enroll($studentId, $classRoomId);
+    }
+
+    header("Location: enrollments.php?message=" . urlencode($message));
+    exit;
 }
 
+if (isset($_GET['message'])) {
+    $message = $_GET['message'];
+}
+
+// Buscar alunos
+$students = $studentRepository->findAll();
+
+// Buscar turmas
+$classrooms = $classRoomRepository->findAll();
+
 // Listar matrículas
-$listStmt = $pdo->query("
-    SELECT s.name, c.description, c.year
+$stmt = $pdo->query("
+    SELECT
+        e.id,
+        e.student_id,
+        s.name,
+        c.description,
+        c.year
     FROM enrollments e
     JOIN students s ON s.id = e.student_id
     JOIN classrooms c ON c.id = e.classroom_id
     ORDER BY c.year, c.description
 ");
 
-$enrollments = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+$enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
-
-<!-- HTML -->
 
 <h1>Matrículas</h1>
 
 <?php if ($message): ?>
-    <p><strong><?= $message ?></strong></p>
+    <p><strong><?= htmlspecialchars($message) ?></strong></p>
 <?php endif; ?>
+
+<h2><?= $editingEnrollment ? "Trocar Turma" : "Nova Matrícula" ?></h2>
 
 <form method="POST">
 
+    <?php if ($editingEnrollment): ?>
+        <input type="hidden" name="enrollment_id" value="<?= $editingEnrollment['id'] ?>">
+    <?php endif; ?>
+
     <label>Aluno:</label><br>
-    <select name="student_id" required>
+    <select name="student_id" required <?= $editingEnrollment ? 'disabled' : '' ?>>
         <option value="">-- Escolha --</option>
         <?php foreach ($students as $student): ?>
-            <option value="<?= $student['id'] ?>">
+            <option value="<?= $student['id'] ?>"
+                <?= ($editingEnrollment && $editingEnrollment['student_id'] == $student['id']) ? 'selected' : '' ?>>
                 <?= htmlspecialchars($student['name']) ?>
             </option>
         <?php endforeach; ?>
     </select><br><br>
+
+    <?php if ($editingEnrollment): ?>
+        <input type="hidden" name="student_id" value="<?= $editingEnrollment['student_id'] ?>">
+    <?php endif; ?>
 
     <label>Turma:</label><br>
     <select name="classroom_id" required>
         <option value="">-- Escolha --</option>
         <?php foreach ($classrooms as $classroom): ?>
             <option value="<?= $classroom['id'] ?>">
-                <?= $classroom['description'] ?> - <?= $classroom['year'] ?>
+                <?= htmlspecialchars($classroom['description']) ?> - <?= $classroom['year'] ?>
             </option>
         <?php endforeach; ?>
     </select><br><br>
 
-    <button type="submit">Matricular</button>
+    <button type="submit">
+        <?= $editingEnrollment ? "Trocar Turma" : "Matricular" ?>
+    </button>
 
 </form>
 
@@ -84,16 +132,24 @@ $enrollments = $listStmt->fetchAll(PDO::FETCH_ASSOC);
         width: 100%;
     }
 </style>
+
 <table>
     <tr>
+        <th>ID</th>
         <th>Aluno</th>
         <th>Turma</th>
+        <th>Ações</th>
     </tr>
 
     <?php foreach ($enrollments as $enrollment): ?>
         <tr>
+            <td><?= $enrollment['id'] ?></td>
             <td><?= htmlspecialchars($enrollment['name']) ?></td>
-            <td><?= $enrollment['description'] ?> - <?= $enrollment['year'] ?></td>
+            <td><?= htmlspecialchars($enrollment['description']) ?> - <?= $enrollment['year'] ?></td>
+            <td>
+                <a href="enrollments.php?edit=<?= $enrollment['id'] ?>">Trocar</a> |
+                <a href="enrollments.php?delete=<?= $enrollment['id'] ?>"onclick="return confirm('Tem certeza que deseja remover a matrícula?')">Excluir</a>
+            </td>
         </tr>
     <?php endforeach; ?>
 
