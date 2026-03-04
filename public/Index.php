@@ -21,6 +21,10 @@
         <button type="submit">Turmas</button>
     </form>
 
+    <form action="Enrollments.php" method="get">
+        <button type="submit">Matrículas</button>
+    </form>
+
     <form action="Report.php" method="get">
         <button type="submit">Relatórios</button>
     </form>

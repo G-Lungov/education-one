@@ -9,13 +9,13 @@
             $this->connection = $connection;
         }
 
-        public function save(string $description, int $year, int $vacancies): void
+        public function save(string $description, int $year, int $places): void
         {
             $stmt = $this->connection->prepare(
-                "INSERT INTO classrooms (description, year, vacancies) VALUES (?, ?, ?)"
+                "INSERT INTO classrooms (description, year, places) VALUES (?, ?, ?)"
             );
 
-            $stmt->execute([$description, $year, $vacancies]);
+            $stmt->execute([$description, $year, $places]);
         }
 
         public function findById(int $id): array|false
