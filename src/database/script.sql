@@ -3,7 +3,7 @@ USE education_one;
     CREATE TABLE students (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(150) NOT NULL,
-        biRth_date DATE NOT NULL,
+        birth_date DATE NOT NULL,
         cpf VARCHAR(11) NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );

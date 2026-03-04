@@ -8,9 +8,9 @@ $classRoomRepository = new ClassRoomRepository($pdo);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = $_POST['description'];
     $year = (int) $_POST['year'];
-    $vacancies = (int) $_POST['vacancies'];
+    $places = (int) $_POST['places'];
 
-    $classRoomRepository->save($description, $year, $vacancies);
+    $classRoomRepository->save($description, $year, $places);
 
     header("Location: classrooms.php");
     exit;
@@ -39,7 +39,7 @@ $classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <input type="number" name="year" required><br><br>
 
     <label>Vagas:</label><br>
-    <input type="number" name="vacancies" required><br><br>
+    <input type="number" name="places" required><br><br>
 
     <button type="submit">Cadastrar</button>
 </form>
@@ -67,7 +67,7 @@ $classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr>
             <td><?= htmlspecialchars($classroom['description']) ?></td>
             <td><?= $classroom['year'] ?></td>
-            <td><?= $classroom['vacancies'] ?></td>
+            <td><?= $classroom['places'] ?></td>
         </tr>
     <?php endforeach; ?>
 
