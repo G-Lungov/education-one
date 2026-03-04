@@ -1,7 +1,7 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/Service/AttendanceReportService.php';
+require '../src/service/AttendanceReportService.php';
 require '../src/views/layout/Header.php';
 
 // Buscar turmas

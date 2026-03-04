@@ -1,6 +1,6 @@
 <?php
 
-require_once '../src/Repository/EnrollmentRepository.php';
+require_once __DIR__ . '/../Repository/EnrollmentRepository.php';
 
 class EnrollmentService
 {

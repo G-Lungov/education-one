@@ -1,7 +1,7 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/Repository/ClassRoomRepository.php';
+require '../src/repository/ClassRoomRepository.php';
 require '../src/views/layout/Header.php';
 
 $classRoomRepository = new ClassRoomRepository($pdo);

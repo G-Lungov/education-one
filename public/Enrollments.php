@@ -1,8 +1,7 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/Service/EnrollmentService.php';
-require '../src/Repository/EnrollmentRepository.php';
+require '../src/service/EnrollmentService.php';
 require '../src/views/layout/Header.php';
 
 $enrollmentRepository = new EnrollmentRepository($pdo);

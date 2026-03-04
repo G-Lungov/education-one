@@ -1,7 +1,7 @@
 <?php
 
 $pdo = require '../config/database.php';
-require '../src/Repository/StudentRepository.php';
+require '../src/repository/StudentRepository.php';
 require '../src/views/layout/Header.php';
 
 $studentRepository = new StudentRepository($pdo);
