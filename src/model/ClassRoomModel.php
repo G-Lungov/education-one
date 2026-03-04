@@ -1,6 +1,6 @@
 <?php
 
-class ClassRoom
+class ClassRoomModel
 {
     private int $id;
     private string $description;

@@ -1,6 +1,6 @@
 <?php
 
-class Student
+class StudentModel
 {
     private int $id;
     private string $name;
