@@ -1,0 +1,77 @@
+<?php
+
+$pdo = require '../config/database.php';
+require '../src/Repository/ClassRoomRepository.php';
+
+$classRoomRepository = new ClassRoomRepository($pdo);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $description = $_POST['description'];
+    $year = (int) $_POST['year'];
+    $vacancies = (int) $_POST['vacancies'];
+
+    $classRoomRepository->save($description, $year, $vacancies);
+
+    header("Location: classrooms.php");
+    exit;
+}
+
+$stmt = $pdo->query("SELECT * FROM classrooms");
+$classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Turmas</title>
+</head>
+<body>
+
+<h1>Cadastro de Turmas</h1>
+
+<form method="POST">
+    <label>Descrição:</label><br>
+    <input type="text" name="description" required><br><br>
+
+    <label>Ano:</label><br>
+    <input type="number" name="year" required><br><br>
+
+    <label>Vagas:</label><br>
+    <input type="number" name="vacancies" required><br><br>
+
+    <button type="submit">Cadastrar</button>
+</form>
+
+<hr>
+
+<h2>Lista de Turmas</h2>
+
+<style>
+    table, th, td {
+        border-collapse: collapse;
+        border: 1px solid black;
+        padding: 5px;
+        width: 100%;
+    }
+</style>
+<table>
+    <tr>
+        <th>Descrição</th>
+        <th>Ano</th>
+        <th>Vagas</th>
+    </tr>
+
+    <?php foreach ($classrooms as $classroom): ?>
+        <tr>
+            <td><?= htmlspecialchars($classroom['description']) ?></td>
+            <td><?= $classroom['year'] ?></td>
+            <td><?= $classroom['vacancies'] ?></td>
+        </tr>
+    <?php endforeach; ?>
+
+</table>
+
+</body>
+</html>

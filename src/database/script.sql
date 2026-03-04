@@ -2,7 +2,7 @@ USE education_one;
 
     CREATE TABLE students (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(150) NOT NNULL,
+        name VARCHAR(150) NOT NULL,
         biRth_date DATE NOT NULL,
         cpf VARCHAR(11) NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -16,7 +16,7 @@ USE education_one;
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
-    CREATE TABLER enrollments (
+    CREATE TABLE enrollments (
         id INT AUTO_INCREMENT PRIMARY KEY,
         student_id INT NOT NULL,
         classroom_id INT NOT NULL,
