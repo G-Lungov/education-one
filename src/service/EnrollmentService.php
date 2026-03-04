@@ -1,34 +1,52 @@
 <?php
 
+require_once '../src/Repository/EnrollmentRepository.php';
+
 class EnrollmentService
 {
     private EnrollmentRepository $enrollmentRepository;
-    private ClassRoomRepository $classRoomRepository;
     private PDO $connection;
 
-    public function __construct(EnrollmentRepository $enrollmentRepository, ClassRoomRepository $classRoomRepository, PDO $connection)
+    public function __construct(PDO $connection)
     {
-        $this->enrollmentRepository = $enrollmentRepository;
-        $this->classRoomRepository = $classRoomRepository;
         $this->connection = $connection;
+        $this->enrollmentRepository = new EnrollmentRepository($connection);
     }
 
-    public function enroll(int $studentId, int $classRoomId): void
+    public function enroll(int $studentId, int $classRoomId): string
     {
+        // Inicia transação
         $this->connection->beginTransaction();
-        try {
-            $classroom = $this->classRoomRepository->findByIdForUpdate($classRoomId);
-            $currentEnrollments = $this->enrollmentRepository->countByClassRoomId($classRoomId);
 
-            if (!$classroom->hasPlaces($currentEnrollments)) {
-                throw new Exception("Turma cheia, não é possível realizar a matrícula.");
+        try {
+
+            // Conta matrículas existentes
+            $currentCount = $this->enrollmentRepository->countByClassRoom($classRoomId);
+
+            // Busca quantidade de vagas
+            $stmt = $this->connection->prepare(
+                "SELECT places FROM classrooms WHERE id = ?"
+            );
+            $stmt->execute([$classRoomId]);
+            $places = (int) $stmt->fetchColumn();
+
+            if ($currentCount >= $places) {
+                $this->connection->rollBack();
+                return "Turma sem vagas.";
             }
 
-            $this->enrollmentRepository->save($studentId, $classRoomId);
+            $this->enrollmentRepository->save(
+                $studentId,
+                $classRoomId,
+                date('Y-m-d')
+            );
+
             $this->connection->commit();
+            return "Matrícula realizada com sucesso!";
+
         } catch (Exception $e) {
             $this->connection->rollBack();
-            throw $e;
+            return "Erro ao realizar matrícula.";
         }
     }
 }

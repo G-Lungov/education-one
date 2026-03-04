@@ -1,8 +1,8 @@
 <?php
 
 $pdo = require '../config/database.php';
-
 require '../src/Service/AttendanceReportService.php';
+require '../src/views/layout/Header.php';
 
 // Buscar turmas
 $stmt = $pdo->query("SELECT id, description, year FROM classrooms");
@@ -18,13 +18,7 @@ if (isset($_GET['classroom_id']) && !empty($_GET['classroom_id'])) {
 
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Relatório de Chamada</title>
-</head>
-<body>
+<!-- HTML -->
 
 <h1>Relatório de Chamada</h1>
 
@@ -71,5 +65,4 @@ if (isset($_GET['classroom_id']) && !empty($_GET['classroom_id'])) {
 
 <?php endif; ?>
 
-</body>
-</html>
+<?php require '../src/views/layout/Footer.php'; ?>

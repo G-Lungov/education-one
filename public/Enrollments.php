@@ -1,8 +1,9 @@
 <?php
 
 $pdo = require '../config/database.php';
-
+require '../src/Service/EnrollmentService.php';
 require '../src/Repository/EnrollmentRepository.php';
+require '../src/views/layout/Header.php';
 
 $enrollmentRepository = new EnrollmentRepository($pdo);
 
@@ -21,19 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $studentId = (int) $_POST['student_id'];
     $classRoomId = (int) $_POST['classroom_id'];
 
-    // Verificar vagas
-    $count = $enrollmentRepository->countByClassRoom($classRoomId);
-
-    $stmt = $pdo->prepare("SELECT places FROM classrooms WHERE id = ?");
-    $stmt->execute([$classRoomId]);
-    $places = (int) $stmt->fetchColumn();
-
-    if ($count >= $places) {
-        $message = "Turma sem vagas.";
-    } else {
-        $enrollmentRepository->save($studentId, $classRoomId, date('Y-m-d'));
-        $message = "Matrícula realizada com sucesso!";
-    }
+    $service = new EnrollmentService($pdo);
+    $message = $service->enroll($studentId, $classRoomId);
 }
 
 // Listar matrículas
@@ -49,13 +39,7 @@ $enrollments = $listStmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Matrículas</title>
-</head>
-<body>
+<!-- HTML -->
 
 <h1>Matrículas</h1>
 
@@ -116,5 +100,4 @@ $enrollments = $listStmt->fetchAll(PDO::FETCH_ASSOC);
 
 </table>
 
-</body>
-</html>
+<?php require '../src/views/layout/Footer.php'; ?>

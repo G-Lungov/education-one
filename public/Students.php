@@ -2,6 +2,7 @@
 
 $pdo = require '../config/database.php';
 require '../src/Repository/StudentRepository.php';
+require '../src/views/layout/Header.php';
 
 $studentRepository = new StudentRepository($pdo);
 
@@ -21,13 +22,7 @@ $students = $studentRepository->findAll();
 
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Alunos</title>
-</head>
-<body>
+<!-- HTML -->
 
 <h1>Cadastro de Alunos</h1>
 
@@ -73,5 +68,4 @@ $students = $studentRepository->findAll();
 
 </table>
 
-</body>
-</html>
+<?php require '../src/views/layout/Footer.php'; ?>

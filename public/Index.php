@@ -1,13 +1,8 @@
 <?php
+require '../src/views/layout/Header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Education One</title>
-</head>
-<body>
+<!-- HTML -->
 
     <h1>Education One</h1>
 
@@ -29,5 +24,4 @@
         <button type="submit">Relatórios</button>
     </form>
 
-</body>
-</html>
+<?php require '../src/views/layout/Footer.php'; ?>

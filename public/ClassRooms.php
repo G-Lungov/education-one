@@ -2,6 +2,7 @@
 
 $pdo = require '../config/database.php';
 require '../src/Repository/ClassRoomRepository.php';
+require '../src/views/layout/Header.php';
 
 $classRoomRepository = new ClassRoomRepository($pdo);
 
@@ -21,13 +22,7 @@ $classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Turmas</title>
-</head>
-<body>
+<!-- HTML -->
 
 <h1>Cadastro de Turmas</h1>
 
@@ -73,5 +68,4 @@ $classrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </table>
 
-</body>
-</html>
+<?php require '../src/views/layout/Footer.php'; ?>
